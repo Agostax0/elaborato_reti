@@ -27,7 +27,7 @@ while True:
        serversocket.sendto(ls().encode(),clientAddress)
     
     if(message.decode().__contains__('download')):
-        file_id = int(message.decode().replace('download ',''))
+        file_id = int(message.decode().split()[1])
         files = get_files()
         file_name = files[file_id-1]
         print("client ", clientAddress," requesed ", file_name)

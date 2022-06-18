@@ -1,6 +1,9 @@
 from socket import *
 import os
-path = os.path.dirname(__file__)+"\\download\\"
+path = os.path.dirname(__file__)+"\\download\\" #if the folder doesn't exist
+if(not os.path.exists(path)):
+    os.mkdir(path)
+
 servername = 'a'
 serverport = 1200
 clientsocket = socket(AF_INET, SOCK_DGRAM)

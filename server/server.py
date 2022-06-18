@@ -29,17 +29,20 @@ while True:
     if(message.decode().__contains__('download')):
         file_id = int(message.decode().replace('download ',''))
         files = get_files()
-        file = files[file_id-1]
-        serversocket.sendto(file.encode(),clientAddress)
-        f_in = open(path+file,'rb')
+        file_name = files[file_id-1]
+        print("client ", clientAddress," requesed ", file_name)
+        serversocket.sendto(file_name.encode(),clientAddress)
+        f_in = open(path+file_name,'rb')
         while True:
             read = f_in.read(2048)
             if(read==b''):
+                print("file sent")
                 serversocket.sendto(b'',clientAddress)
                 break
             else:
                 serversocket.sendto(read,clientAddress)
     
     if(message.decode()=='shutdown'):
-        break
-serversocket.close()
+        serversocket.close()
+        exit()
+

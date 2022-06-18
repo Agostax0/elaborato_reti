@@ -33,7 +33,7 @@ while True:
         serversocket.sendto(file.encode(),clientAddress)
         f_in = open(path+file,'rb')
         while True:
-            read = f_in.read(2028)
+            read = f_in.read(2048)
             if(read==b''):
                 serversocket.sendto(b'',clientAddress)
                 break

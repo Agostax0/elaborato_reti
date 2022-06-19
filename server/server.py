@@ -35,21 +35,24 @@ while True:
        serversocket.sendto(ls().encode(),client_address)
     
     if(message.decode().__contains__(comands[1])):#get comand
-        file_id = int(message.decode().split()[1])
-        files = get_files()
-        file_name = files[file_id-1]
-        print("client ", client_address," requesed ", file_name)
-        serversocket.sendto(file_name.encode(),client_address)
-        f_in = open(path+file_name,'rb')
-        while True:
-            read = f_in.read(2048)
-            if(read==b''):
-                print("file sent")
-                serversocket.sendto(b'',client_address)
-                break
-            else:
-                serversocket.sendto(read,client_address)
-
+        try:
+            file_id = int(message.decode().split()[1])
+            files = get_files()
+            file_name = files[file_id-1]
+            print("client ", client_address," requesed ", file_name)
+            serversocket.sendto(file_name.encode(),client_address)
+            f_in = open(path+file_name,'rb')
+            while True:
+                read = f_in.read(2048)
+                if(read==b''):
+                    print("file sent")
+                    serversocket.sendto(b'',client_address)
+                    break
+                else:
+                    serversocket.sendto(read,client_address)
+        except: #il server deve informare il client che non ha trovato il file
+            serversocket.sendto("File not found".encode(),client_address)
+            
     if(message.decode().__contains__(comands[2])):#put comand
         title, client_address = serversocket.recvfrom(2048)
         file = open(path+title.decode(),'wb')

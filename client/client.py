@@ -21,26 +21,33 @@ while True:
    
     if(message.__contains__(comands[1])):#get comand
         title, serveraddress = clientsocket.recvfrom(2048)
-        file = open(path+title.decode(),'wb')
-        while True:
-            packet, serveraddress = clientsocket.recvfrom(2048)
-            if(packet==b''):
-                file.close()
-                break
-            else:
-                file.write(packet)
+        if(title.decode().__contains__("File not found")):
+            print("File not found")
+        else:
+            file = open(path+title.decode(),'wb')#la creazione file non crea eccezioni
+            while True:
+                packet, serveraddress = clientsocket.recvfrom(2048)
+                if(packet==b''):
+                    file.close()
+                    break
+                else:
+                    file.write(packet)
     if(message.__contains__(comands[2])):#put comand
         title = message.split()[1]
-        clientsocket.sendto(title.encode(),(servername,serverport))
-        file = open(path+title ,'rb')
-        while True:
-            packet = file.read()
+        try:
+            file = open(path+title ,'rb')
+            clientsocket.sendto(title.encode(),(servername,serverport))
+            while True:
+                packet = file.read()
             if(packet==b''):
                 clientsocket.sendto(packet,(servername,serverport))
                 file.close()
                 break
             else:
                 clientsocket.sendto(packet,(servername,serverport))
+        except:
+            print("File not found")
+        
     if(message.__contains__(comands[3])):#help comand
         s_answer, serveraddress = clientsocket.recvfrom(2048)
         print(s_answer.decode())

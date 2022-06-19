@@ -1,5 +1,6 @@
 from socket import *
 import os
+import sys
 path = os.path.dirname(__file__)+"\\download\\" #if the folder doesn't exist
 if(not os.path.exists(path)):
     os.mkdir(path)
@@ -10,8 +11,7 @@ clientsocket = socket(AF_INET, SOCK_DGRAM)
 
 while True:
     message = input('input the command: ')
-    if(message=='exit'):
-        break
+    
     if(message=='ls'):
         clientsocket.sendto("ls".encode(),(servername,serverport))
         s_answer, s_address = clientsocket.recvfrom(2048)
@@ -28,5 +28,9 @@ while True:
                 break
             else:
                 file.write(packet)
-    
+                
+    if(message.__contains__('shutdown')):
+        clientsocket.sendto('shutdown'.encode(),(servername,serverport))
+        break
 clientsocket.close()
+sys.exit()

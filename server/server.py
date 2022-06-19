@@ -54,16 +54,17 @@ while True:
             serversocket.sendto("File not found".encode(),client_address)
             
     if(message.decode().__contains__(comands[2])):#put comand
-        title, client_address = serversocket.recvfrom(2048)
-        file = open(path+title.decode(),'wb')
+        title = message.decode().split()[1]
+        print("receiving ",title)
+        file = open(path+title,'wb')
         while True:
             packet, client_address = serversocket.recvfrom(2048)
             if(packet==b''):
                 file.close()
+                print("finished receiving ", title)
                 break
             else:
                 file.write(packet)
-        print("file received")
     
     if(message.decode().__contains__('shutdown')):
         serversocket.close()

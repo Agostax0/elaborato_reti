@@ -1,8 +1,7 @@
 from socket import *
 import os
-import sys
 
-comands = ["list","get","put","help"]
+comands = ["list","get","put"]
 path = os.path.dirname(__file__)+"\\download\\" #if the folder doesn't exist
 if(not os.path.exists(path)):
     os.mkdir(path)
@@ -10,16 +9,15 @@ if(not os.path.exists(path)):
 server_name = 'a'
 server_port = 1200
 client_socket = socket(AF_INET, SOCK_DGRAM)
-
 while True:
-    message = input('input the command: ')
-    client_socket.sendto(message.encode(),(server_name,server_port))
-    
-    if(message.__contains__(comands[0])): #list comand
+
+    message = input('input the comand: ')
+    if(message.__contains__("list")): #list comand
+        client_socket.sendto(message.encode(),(server_name,server_port))
         s_answer, s_address = client_socket.recvfrom(2048)
         print(s_answer.decode())
-   
-    if(message.__contains__(comands[1])):#get comand
+    elif(message.__contains__("get")):#get comand
+        client_socket.sendto(message.encode(),(server_name,server_port))
         title, s_address = client_socket.recvfrom(2048)
         if(title.decode().__contains__("File not found")):
             print("File not found")
@@ -32,10 +30,13 @@ while True:
                     break
                 else:
                     file.write(packet)
-    if(message.__contains__(comands[2])):#put comand
+        client_socket.close()
+        break
+    elif(message.__contains__("put")):#put comand
         title = message.split()[1]
         try:
             file = open(path+title ,'rb')
+            client_socket.sendto(message.encode(),(server_name,server_port))
             print("sending ", title)
             while True:
                 packet = file.read(2048)
@@ -48,13 +49,11 @@ while True:
                     client_socket.sendto(packet,(server_name,server_port))
         except:
             print("File not found")
-        
-    if(message.__contains__(comands[3])):#help comand
-        s_answer, s_address = client_socket.recvfrom(2048)
-        print(s_answer.decode())
-    
-    if(message.__contains__('shutdown')):
-        client_socket.sendto(message.encode(),(server_name,server_port))
+        client_socket.close()
         break
-client_socket.close()
-sys.exit()
+    else:
+        client_socket.sendto(message.encode(),(server_name,server_port))
+        s_answer, s_address = client_socket.recvfrom(2048)
+        #os.system('clear')
+        #os.system('cls')
+        print(s_answer.decode())

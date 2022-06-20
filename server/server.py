@@ -3,8 +3,18 @@ import os
 import sys
 path = os.path.dirname(__file__)+"\\library\\"
 
-comands = ["list","get","put","help"]
-
+comands = {}
+comands["list"] = "1 or list ... lists all avaible files"   
+comands["get"] = "2 or get [\"name\"] ... downloads the selected file if it exists"
+comands["put"] = "3 or put [\"name\"] ... uploads the selected file if it exists"
+comand_list = []
+for comand in comands:
+    comand_list.append(comand)
+def get_comands_description():
+    comands_description = ""
+    for tooltip in comands:
+        comands_description+=(comands[tooltip]+"\n")
+    return comands_description
 def get_files():
     files = []
     for file in os.scandir(path=path):
@@ -26,22 +36,36 @@ serversocket = socket(AF_INET, SOCK_DGRAM)
 server_address = ('localhost',server_port)
 
 serversocket.bind(server_address)
+
 print('server open on ', server_address)
 while True:
     message, client_address = serversocket.recvfrom(2048)
-    print("recieved ", len(message), " bytes from ",client_address, " message: ", message.decode())
+    message = message.decode()
     
-    if(message.decode().__contains__(comands[0])):#list comand
-       serversocket.sendto(ls().encode(),client_address)
+    try:
+        c_comand = message.split()[0]
+        c_subject = message.split()[1]
+    except:
+        if(not c_comand): #se il client invia un comando non vuoto ma un soggetto vuoto
+            c_comand = ""   #allora solo il soggetto viene impostato a ""
+        c_subject = ""      #list != put x
     
-    if(message.decode().__contains__(comands[1])):#get comand
+    if(c_comand=="list" or c_comand=="1"):
+        serversocket.sendto(ls().encode(),client_address)
+    elif(c_comand=="get" or c_comand=="2"):
         try:
-            file_id = int(message.decode().split()[1])
-            files = get_files()
-            file_name = files[file_id-1]
-            print("client ", client_address," requesed ", file_name)
-            serversocket.sendto(file_name.encode(),client_address)
+            try:
+                file_id = int(c_subject)
+                print("client referred to the file using its id")
+                files = get_files()
+                file_name = files[file_id-1]
+            except:
+                if(c_subject):
+                    print("client referred to the file using its name")
+                    file_name = c_subject
+            print("client ", client_address," requested ", file_name)
             f_in = open(path+file_name,'rb')
+            serversocket.sendto(file_name.encode(),client_address)
             while True:
                 read = f_in.read(2048)
                 if(read==b''):
@@ -52,9 +76,9 @@ while True:
                     serversocket.sendto(read,client_address)
         except: #il server deve informare il client che non ha trovato il file
             serversocket.sendto("File not found".encode(),client_address)
-            
-    if(message.decode().__contains__(comands[2])):#put comand
-        title = message.decode().split()[1]
+        
+    elif (c_comand=="put" or c_comand=="3"):
+        title = c_subject
         print("receiving ",title)
         file = open(path+title,'wb')
         while True:
@@ -65,13 +89,6 @@ while True:
                 break
             else:
                 file.write(packet)
-    
-    if(message.decode().__contains__('shutdown')):
-        serversocket.close()
-        sys.exit()
-    
-    if(message.decode().__contains__(comands[3])):#help
-        comand_description1 = "[list] lists all avaible files" + "\n" + "[get] downloads the file selected" + "\n"
-        comand_description2 = "[put] uploads a file" + "\n"
-        comand_description = comand_description1 + comand_description2
-        serversocket.sendto(comand_description.encode(), client_address)
+        
+    else:
+        serversocket.sendto(get_comands_description().encode(), client_address)

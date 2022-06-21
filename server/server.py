@@ -1,6 +1,5 @@
 from socket import *
 import os
-import sys
 path = os.path.dirname(__file__)+"\\library\\"
 
 comands = {}
@@ -44,11 +43,11 @@ while True:
     
     try:
         c_comand = message.split()[0]
-        c_subject = message.split()[1]
+        c_subject = message[len(c_comand)+1:] #prende tutto dopo (primo blocco + " ")
     except:
         if(not c_comand): #se il client invia un comando non vuoto ma un soggetto vuoto
             c_comand = ""   #allora solo il soggetto viene impostato a ""
-        c_subject = ""      #list != put x
+        c_subject = ""      
     
     if(c_comand=="list" or c_comand=="1"):
         serversocket.sendto(ls().encode(),client_address)
@@ -69,6 +68,7 @@ while True:
             while True:
                 read = f_in.read(2048)
                 if(read==b''):
+                    f_in.close()
                     print("file sent")
                     serversocket.sendto(b'',client_address)
                     break
@@ -79,7 +79,7 @@ while True:
         
     elif (c_comand=="put" or c_comand=="3"):
         title = c_subject
-        print("receiving ",title)
+        print("receiving"+" \"" + title + "\"")
         file = open(path+title,'wb')
         while True:
             packet, client_address = serversocket.recvfrom(2048)
@@ -89,6 +89,5 @@ while True:
                 break
             else:
                 file.write(packet)
-        
     else:
         serversocket.sendto(get_comands_description().encode(), client_address)

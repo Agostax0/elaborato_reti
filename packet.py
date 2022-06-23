@@ -8,17 +8,25 @@ class packet:
         self.subject = subject
         self.acknowlegde = acknowlegde
         self.data = data
-    def __init__(self,message,acknowlegde,data):
-        self.comand = message.split()[0]
-        self.subject = message[len(self.comand) + 1:]
+    @classmethod
+    def from_message(self,message,acknowlegde,data):
+        try:
+            self.comand = message.split()[0]
+            self.subject = message[len(self.comand) + 1:]
+        except:
+            self.comand = "None"
+            self.subject = ""
         self.acknowlegde = acknowlegde
         self.data = data
+        return self
+    @classmethod
     def __str__(self):
         acknowlegde_part = "acknowledge: " + str(len(str(self.acknowlegde))) +" "+ str(self.acknowlegde) + " "
         comand_part = "comand: " + str(len(self.comand)) +" "+ self.comand + " "
         subject_part = "subject: " + str(len(self.subject)) +" " + self.subject + " "
         data_part = "data: " + str(len(self.data)) + " "
         return acknowlegde_part + comand_part + subject_part + data_part
+    @classmethod
     def encode(self):
         temp = self.__str__()
         return temp.encode() + self.data

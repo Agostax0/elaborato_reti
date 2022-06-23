@@ -1,3 +1,4 @@
+from ctypes import c_double
 from socket import *
 import os
 from packet import *
@@ -40,19 +41,24 @@ serversocket.bind(server_address)
 
 print('server open on ', server_address)
 while True:
-    message, client_address = serversocket.recvfrom(2048)
-    message = message.decode()
+    c_packet, client_address = serversocket.recvfrom(2048)
+    print(c_packet.decode())
     
-    try:
-        c_comand = message.split()[0]
-        c_subject = message[len(c_comand)+1:] #prende tutto dopo (primo blocco + " ")
-    except:
-        if(not c_comand): #se il client invia un comando non vuoto ma un soggetto vuoto
-            c_comand = ""   #allora solo il soggetto viene impostato a ""
-        c_subject = ""      
+    c_packet = decode_packet(c_packet)
     
-    if(c_comand=="list" or c_comand=="1"):
-        serversocket.sendto(ls().encode(),client_address)
+    c_comand = c_packet.comand
+    c_subject = c_packet.subject
+    c_ack = c_packet.ack
+    c_data = c_packet.data
+    print("c_comand:", c_comand)
+    print("c_subj:", c_subject)
+    print("c_ack:", c_ack)
+    print("c_data:", c_data)
+    
+    if(c_packet.comand=="list" or c_packet.comand=="1"):
+        s_packet = packet(c_comand, c_subject, c_ack, ls().encode())
+        toSend = s_packet.encode()
+        serversocket.sendto(toSend,client_address)
     elif(c_comand=="get" or c_comand=="2"):
         try:
             try:

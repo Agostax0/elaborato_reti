@@ -42,10 +42,10 @@ serversocket.bind(server_address)
 print('server open on ', server_address)
 while True:
     c_packet, client_address = serversocket.recvfrom(2048)
-    print(c_packet.decode())
+
+    print(c_packet)
     
-    c_packet = decode_packet(c_packet)
-    
+    z_packet, client_address = serversocket.recvfrom(2048)
     c_comand = c_packet.comand
     c_subject = c_packet.subject
     c_ack = c_packet.ack

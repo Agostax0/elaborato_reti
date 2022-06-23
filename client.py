@@ -17,13 +17,12 @@ while True:
     
     c_packet = packet.from_message(message,200,b'')
     
-    print(c_packet)
+    print(c_packet.encode())
     
     if(c_packet.comand == "list" or c_packet == "1"): #list comand
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
         s_packet, s_address = client_socket.recvfrom(2048)
         s_packet = decode_packet(s_packet)
-        print(s_packet)
     elif(message.__contains__("get") or message.split()[0].__contains__("2")):#get comand
         client_socket.sendto(message.encode(),(server_name,server_port))
         title, s_address = client_socket.recvfrom(2048)

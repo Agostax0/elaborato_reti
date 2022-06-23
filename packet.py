@@ -9,20 +9,26 @@ class packet:
         self.ack = ack
         self.data = data
     @classmethod
-    def from_message(self,message,ack,data):
-        self.ack = ack
-        self.data = data
+    def from_message(cls,message,ack,data):
         try:
-            self.comand = message.split()[0]
-            self.subject = message[len(self.comand) + 1:]
+            s_comand = message.split()[0]
+            s_subject = message[len(self.comand) + 1:]
         except:
-            self.comand = "None"
-            self.subject = ""
-        return self
-    @classmethod
+            s_comand = "None"
+            s_subject = ""
+        return cls(s_comand,s_subject,ack,data)
+    
+    def __str__(self):
+        acknowledge_part = "ack: " + str(len(str(self.ack))) +" "+ str(self.ack) + " "
+        comand_part = "comand: " + str(len(self.comand)) +" "+ self.comand + " "
+        subject_part = "subject: " + str(len(self.subject)) +" " + self.subject + " "
+        data_part = "data: " + str(len(self.data)) + " "
+        return acknowledge_part + comand_part + subject_part + data_part
+
     def encode(self):
-        temp = packet_str(self)
+        temp = self.__str__()
         return temp.encode() + self.data
+    
 def decode_packet(received_packet):
     byte = received_packet.decode()
     splitted = byte.split()

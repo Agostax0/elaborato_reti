@@ -1,5 +1,21 @@
 from socket import *
 import os
+class packet:
+    def __init__(self,comand,subject,acknowlegde):
+        self.comand = comand
+        self.subject = subject
+        self.acknowlegde = acknowlegde
+    def __str__(self):
+        return (str(self.acknowlegde)+ "\n" + self.comand + "\n" + self.subject)
+def decode_packet(recv):
+    message = recv.decode()
+    message_split = message.split()
+    acknowlegde = message_split[0]
+    comand = message_split[1]
+    subject_start = len(acknowlegde) + 1 + len(comand) + 1
+    subject = message[subject_start:]
+    return packet(comand,subject,acknowlegde)
+    
 path = os.path.dirname(__file__)+"\\library\\"
 
 comands = {}

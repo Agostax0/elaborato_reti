@@ -1,4 +1,3 @@
-from ctypes import c_double
 from socket import *
 import os
 from packet import *
@@ -44,52 +43,45 @@ while True:
     c_packet, client_address = serversocket.recvfrom(2048)
 
     print(c_packet)
-    try:
+    if(check_packet(c_packet) == False):
+        c_packet = packet("", "", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
+    else:
         c_packet = decode_packet(c_packet)
-        c_comand = c_packet.comand
-        c_subject = c_packet.subject
-        c_ack = c_packet.ack
-        c_data = c_packet.data
-    except:
-        c_ack = NEGATIVE_ACKNOWLEDGEMENT
-    #print("c_comand:", c_comand)
-    #print("c_subj:", c_subject)
-    #print("c_ack:", c_ack)
-    #print("c_data:", c_data)
-    
     if(c_packet.comand=="list" or c_packet.comand=="1"):
         try:
-            s_packet = packet(c_comand, c_subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
+            print(ls().encode())
+            s_packet = packet(c_packet.comand, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
+            print(s_packet.data)
         except:
             s_packet = packet("", "", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
         toSend = s_packet.encode()
         print(toSend)
         serversocket.sendto(toSend,client_address)    
-    elif(c_comand=="get" or c_comand=="2"):
+    elif(c_packet.comand=="get" or c_packet.comand=="2"):
         try:
             try:
-                file_id = int(c_subject)
+                file_id = int(c_packet.subject)
                 print("client referred to the file using its id")
                 files = get_files()
                 file_name = files[file_id-1]
             except:
-                if(c_subject):
+                if(c_packet.subject):
                     print("client referred to the file using its name")
-                    file_name = c_subject
+                    file_name = c_packet.subject
             print("client ", client_address," requested ", file_name)
             f_in = open(path+file_name,'rb')
-            serversocket.sendto(file_name.encode(),client_address)
+            serversocket.sendto(packet(c_packet.comand,file_name,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
             while True:
-                read = f_in.read(2048)
+                read = f_in.read(1024)
                 if(read==b''):
                     f_in.close()
                     print("file sent")
-                    serversocket.sendto(b'',client_address)
+                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
                     break
                 else:
-                    serversocket.sendto(read,client_address)
+                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
         except: #il server deve informare il client che non ha trovato il file
-            serversocket.sendto("File not found".encode(),client_address)
+            serversocket.sendto(packet(c_packet.comand,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
         
     elif (c_comand=="put" or c_comand=="3"):
         title = c_subject
@@ -104,4 +96,8 @@ while True:
             else:
                 file.write(packet)
     else:
-        serversocket.sendto(get_comands_description().encode(), client_address)
+        if(c_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):
+            s_packet = packet("","",NEGATIVE_ACKNOWLEDGEMENT,"There was an error".encode()) 
+        else:       
+            s_packet = packet("","",POSITIVE_ACKNOWLEDGEMENT,get_comands_description().encode())
+        serversocket.sendto(s_packet.encode(), client_address)

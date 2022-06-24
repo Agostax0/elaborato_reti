@@ -17,7 +17,7 @@ while True:
     
     c_packet = packet.from_message(message,AWAITING_RESPONCE_ACKNOWLEDGEMENT,EMPTY_DATA)
     
-    print(c_packet.encode())
+    #print(c_packet.encode())
     
     if(c_packet.comand == "list" or c_packet.comand == "1"): #list comand
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
@@ -30,9 +30,9 @@ while True:
                 print("Server has denied permission")
         except:
             print("There was an error")
-    elif(message.__contains__("get") or message.split()[0].__contains__("2")):#get comand
-        client_socket.sendto(c_packet.encode(),(server_name,server_port))
-        s_packet, s_address = client_socket.recvfrom(2048)
+    elif(c_packet.comand=="get" or c_packet.comand=="2"):#get comand
+        client_socket.sendto(c_packet.encode(),(server_name,server_port))#il client invia il comando + soggetto
+        s_packet, s_address = client_socket.recvfrom(2048)#il server invia che ha trovato + ricevuto la richiesta
         if(check_packet(s_packet)==False):
             print("There was an error")
         else:
@@ -42,7 +42,7 @@ while True:
                 print("File not found")
             else:
                 file = open(path+title,'wb')#la creazione file non crea eccezioni
-                client_socket.sendto(packet(s_packet.comand,s_packet.subject,START_TRANSMISSION_ACKNOWLEDGEMENT, EMPTY_DATA).encode(),s_address)
+                #client_socket.sendto(packet(s_packet.comand,s_packet.subject,START_TRANSMISSION_ACKNOWLEDGEMENT, EMPTY_DATA).encode(),s_address)
                 while True:
                     file_packet, s_address = client_socket.recvfrom(2048)
                     if(check_packet(s_packet)==False):

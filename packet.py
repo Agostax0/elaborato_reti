@@ -1,4 +1,5 @@
 
+import math
 FINISHED_TRANSMISSION_ACKNOWLEDGEMENT = 400
 AWAITING_RESPONCE_ACKNOWLEDGEMENT = 100
 POSITIVE_ACKNOWLEDGEMENT = 200
@@ -64,3 +65,14 @@ def check_packet(packet):
         return True
     except:
         return False
+def statistics(size,time):
+    return "Size: " + order(size) + " Time elapsed: " + str(math.floor(time)) + "s Rate: " + order(size/time) + "/s"
+def order(measure):
+    orders = ["B","KB","MB","GB"]
+    order = 0
+    val = measure
+    while val > 1024:
+        val = val / 1024
+        order +=1
+    return str(math.floor(val)) + orders[order]        
+    

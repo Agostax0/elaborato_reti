@@ -1,7 +1,7 @@
 from socket import *
 import os
 from packet import *
-    
+import time
 path = os.path.dirname(__file__)+"\\library\\" #if the folder doesn't exist
 if(not os.path.exists(path)):
     os.mkdir(path)
@@ -72,14 +72,16 @@ while True:
                     file_name = c_packet.subject
             print("client ", client_address," requested ", file_name)
             f_in = open(path+file_name,'rb')
-            serversocket.sendto(packet(c_packet.comand,file_name,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+            serversocket.sendto(packet(c_packet.comand,file_name,START_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+            t0 = time.time()
             while True:
                 read = f_in.read(1024)
-                
                 if(read==b''):
                     f_in.close()
                     print("file sent")
                     serversocket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                    t1 = time.time() - t0
+                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)
                     break
                 else:
                     serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
@@ -91,6 +93,7 @@ while True:
         print("receiving"+" \"" + title + "\"")
         s_packet = packet(c_packet.comand, c_packet.subject, START_TRANSMISSION_ACKNOWLEDGEMENT, EMPTY_DATA)
         serversocket.sendto(s_packet.encode(),client_address)
+        
         file = open(path+title,'wb')
         while True:
             #print("while loop")

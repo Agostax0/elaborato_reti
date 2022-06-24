@@ -1,7 +1,6 @@
 from socket import *
 import os
 from packet import *
-
 comands = ["list","get","put"]
 path = os.path.dirname(__file__)+"\\download\\" #if the folder doesn't exist
 if(not os.path.exists(path)):
@@ -55,6 +54,12 @@ while True:
                         file_packet = decode_packet(file_packet)
                         #print(file_packet)
                         if(file_packet.ack == FINISHED_TRANSMISSION_ACKNOWLEDGEMENT):
+                            s_packet, s_address = client_socket.recvfrom(2048) #ricezione statistiche
+                            if(check_packet(s_packet)==False):
+                                print("There was an error, primo pacchetto corrotto")
+                            else:
+                                s_packet = decode_packet(s_packet)
+                                print(s_packet.data.decode())
                             file.close()
                             break
                         else:

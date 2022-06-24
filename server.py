@@ -2,7 +2,9 @@ from socket import *
 import os
 from packet import *
     
-path = os.path.dirname(__file__)+"\\library\\"
+path = os.path.dirname(__file__)+"\\library\\" #if the folder doesn't exist
+if(not os.path.exists(path)):
+    os.mkdir(path)
 
 comands = {}
 comands["list"] = "1 or list ... lists all avaible files"   
@@ -41,7 +43,7 @@ serversocket.bind(server_address)
 print('server open on ', server_address)
 while True:
     c_packet, client_address = serversocket.recvfrom(2048)
-
+    print(c_packet)
     #print(c_packet)
     if(check_packet(c_packet) == False):
         c_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
@@ -103,13 +105,13 @@ while True:
                 #print(file_packet)
                 if(file_packet.ack == FINISHED_TRANSMISSION_ACKNOWLEDGEMENT):
                     file.close()
+                    print("file received")
                     break
                 else:
                     file.write(file_packet.data) 
     else:
         #print("unrecognised comand", c_packet)
         if(c_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):
-            
             s_packet = packet("None","None",NEGATIVE_ACKNOWLEDGEMENT,"There was an error".encode()) 
         else:       
             s_packet = packet("None","None",POSITIVE_ACKNOWLEDGEMENT,get_comands_description().encode())

@@ -4,6 +4,7 @@ from pickle import EMPTY_DICT
 FILE_NOT_FOUND_ACKNOWLEDGEMENT = 404
 FINISHED_TRANSMISSION_ACKNOWLEDGEMENT = 400
 START_TRANSMISSION_ACKNOWLEDGEMENT = 500
+TRANSMISSION_ACKNOWLEDGEMENT = 250
 AWAITING_RESPONCE_ACKNOWLEDGEMENT = 100
 POSITIVE_ACKNOWLEDGEMENT = 200
 NEGATIVE_ACKNOWLEDGEMENT = 300
@@ -49,7 +50,7 @@ def decode_packet(received_packet):
     data_splitted = data_part.split()
     data_part_start = len(data_splitted[0]) + 1 + len(data_splitted[1]) + 1
     data = data_part[data_part_start:]
-    ret = packet(comand,subject,ack,data)
+    ret = packet(comand,subject,int(ack),data)
     return ret
     #controllare che "data" possa contenere caratteri non interpretabili come stringhe
     #controllare con un file exe binario

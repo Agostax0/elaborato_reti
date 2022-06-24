@@ -12,7 +12,7 @@ class packet:
     def from_message(cls,message,ack,data):
         try:
             s_comand = message.split()[0]
-            s_subject = message[len(self.comand) + 1:]
+            s_subject = message[len(s_comand) + 1:]
         except:
             s_comand = "None"
             s_subject = ""

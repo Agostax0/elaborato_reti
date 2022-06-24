@@ -45,19 +45,21 @@ while True:
 
     print(c_packet)
     
-    z_packet, client_address = serversocket.recvfrom(2048)
+    c_packet = decode_packet(c_packet)
+    
     c_comand = c_packet.comand
     c_subject = c_packet.subject
     c_ack = c_packet.ack
     c_data = c_packet.data
-    print("c_comand:", c_comand)
-    print("c_subj:", c_subject)
-    print("c_ack:", c_ack)
-    print("c_data:", c_data)
+    #print("c_comand:", c_comand)
+    #print("c_subj:", c_subject)
+    #print("c_ack:", c_ack)
+    #print("c_data:", c_data)
     
     if(c_packet.comand=="list" or c_packet.comand=="1"):
         s_packet = packet(c_comand, c_subject, c_ack, ls().encode())
         toSend = s_packet.encode()
+        print(toSend)
         serversocket.sendto(toSend,client_address)
     elif(c_comand=="get" or c_comand=="2"):
         try:

@@ -44,23 +44,27 @@ while True:
     c_packet, client_address = serversocket.recvfrom(2048)
 
     print(c_packet)
-    
-    c_packet = decode_packet(c_packet)
-    
-    c_comand = c_packet.comand
-    c_subject = c_packet.subject
-    c_ack = c_packet.ack
-    c_data = c_packet.data
+    try:
+        c_packet = decode_packet(c_packet)
+        c_comand = c_packet.comand
+        c_subject = c_packet.subject
+        c_ack = c_packet.ack
+        c_data = c_packet.data
+    except:
+        c_ack = NEGATIVE_ACKNOWLEDGEMENT
     #print("c_comand:", c_comand)
     #print("c_subj:", c_subject)
     #print("c_ack:", c_ack)
     #print("c_data:", c_data)
     
     if(c_packet.comand=="list" or c_packet.comand=="1"):
-        s_packet = packet(c_comand, c_subject, c_ack, ls().encode())
+        try:
+            s_packet = packet(c_comand, c_subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
+        except:
+            s_packet = packet("", "", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
         toSend = s_packet.encode()
         print(toSend)
-        serversocket.sendto(toSend,client_address)
+        serversocket.sendto(toSend,client_address)    
     elif(c_comand=="get" or c_comand=="2"):
         try:
             try:

@@ -15,15 +15,21 @@ while True:
 
     message = input('input the comand: ')
     
-    c_packet = packet.from_message(message,200,b'')
+    c_packet = packet.from_message(message,AWAITING_RESPONCE_ACKNOWLEDGEMENT,EMPTY_DATA)
     
     print(c_packet.encode())
     
     if(c_packet.comand == "list" or c_packet == "1"): #list comand
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
         s_packet, s_address = client_socket.recvfrom(2048)
-        s_packet = decode_packet(s_packet)
-        print(s_packet.data)
+        try:
+            s_packet = decode_packet(s_packet)
+            if(s_packet.ack==POSITIVE_ACKNOWLEDGEMENT):
+                print(s_packet.data)
+            else:
+                print("Server has denied permission")
+        except:
+            print("There was an error")
     elif(message.__contains__("get") or message.split()[0].__contains__("2")):#get comand
         client_socket.sendto(message.encode(),(server_name,server_port))
         title, s_address = client_socket.recvfrom(2048)

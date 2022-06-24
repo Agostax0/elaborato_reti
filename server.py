@@ -42,20 +42,20 @@ print('server open on ', server_address)
 while True:
     c_packet, client_address = serversocket.recvfrom(2048)
 
-    print(c_packet)
+    #print(c_packet)
     if(check_packet(c_packet) == False):
         c_packet = packet("", "", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
     else:
         c_packet = decode_packet(c_packet)
     if(c_packet.comand=="list" or c_packet.comand=="1"):
         try:
-            print(ls().encode())
+            #print(ls().encode())
             s_packet = packet(c_packet.comand, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
-            print(s_packet.data)
+            #print(s_packet.data)
         except:
             s_packet = packet("", "", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
         toSend = s_packet.encode()
-        print(toSend)
+        #print(toSend)
         serversocket.sendto(toSend,client_address)    
     elif(c_packet.comand=="get" or c_packet.comand=="2"):
         try:
@@ -73,6 +73,7 @@ while True:
             serversocket.sendto(packet(c_packet.comand,file_name,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
             while True:
                 read = f_in.read(1024)
+                
                 if(read==b''):
                     f_in.close()
                     print("file sent")

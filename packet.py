@@ -14,7 +14,7 @@ class packet:
         self.comand = comand
         self.subject = subject
         self.ack = ack
-        self.data = data
+        self.data : bytes = data
     @classmethod
     def from_message(cls,message,ack,data):
         try:
@@ -37,7 +37,8 @@ class packet:
         return temp.encode() + self.data
     
 def decode_packet(received_packet):
-    byte = received_packet.decode()
+    #byte = received_packet.decode()   
+    byte = received_packet
     splitted = byte.split()
     ack = splitted[2]
     comand = splitted[5]
@@ -50,11 +51,12 @@ def decode_packet(received_packet):
     data_splitted = data_part.split()
     data_part_start = len(data_splitted[0]) + 1 + len(data_splitted[1]) + 1
     data = data_part[data_part_start:]
-    ret = packet(comand,subject,int(ack),data)
+    ret = packet(comand.decode(),subject.decode(),int(ack),data)
     return ret
     #controllare che "data" possa contenere caratteri non interpretabili come stringhe
     #controllare con un file exe binario
 def check_packet(packet):
+    decode_packet(packet)
     try:
         decode_packet(packet)
         return True

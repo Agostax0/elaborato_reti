@@ -25,7 +25,7 @@ while True:
         try:
             s_packet = decode_packet(s_packet)
             if(s_packet.ack==POSITIVE_ACKNOWLEDGEMENT):
-                print(s_packet.data)
+                print(s_packet.data.decode())
             else:
                 print("Server has denied permission")
         except:
@@ -34,23 +34,27 @@ while True:
         client_socket.sendto(c_packet.encode(),(server_name,server_port))#il client invia il comando + soggetto
         s_packet, s_address = client_socket.recvfrom(2048)#il server invia che ha trovato + ricevuto la richiesta
         if(check_packet(s_packet)==False):
-            print("There was an error")
+            print("There was an error, primo pacchetto corrotto")
         else:
             s_packet = decode_packet(s_packet)
             title = s_packet.subject
+            #print("titolo ricevuto", title)
             if(s_packet.ack==FILE_NOT_FOUND_ACKNOWLEDGEMENT):
                 print("File not found")
             else:
                 file = open(path+title,'wb')#la creazione file non crea eccezioni
                 #client_socket.sendto(packet(s_packet.comand,s_packet.subject,START_TRANSMISSION_ACKNOWLEDGEMENT, EMPTY_DATA).encode(),s_address)
                 while True:
+                    #print("while loop")
                     file_packet, s_address = client_socket.recvfrom(2048)
-                    if(check_packet(s_packet)==False):
-                        print("There was an error")
+                    #print("check pacchetto read", check_packet(file_packet)==False)
+                    if(check_packet(file_packet)==False):
+                        print("There was an error, pacchetto read corrotto")
                         file.close()
                         break
                     else:
                         file_packet = decode_packet(file_packet)
+                        #print(file_packet)
                         if(file_packet.ack == FINISHED_TRANSMISSION_ACKNOWLEDGEMENT):
                             file.close()
                             break

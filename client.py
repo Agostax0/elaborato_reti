@@ -62,7 +62,27 @@ while True:
                             file.write(file_packet.data)
             client_socket.close()
             break
-    
+    elif(c_packet.comand=="put" or c_packet.comand=="3"):
+        try:
+            file = open(path+c_packet.subject ,'rb')
+            client_socket.sendto(message.encode(),(server_name,server_port))
+            s_packet, s_address = client_socket.recvfrom(2048)
+            if(check_packet(s_packet)):
+                if(decode_packet(s_packet).ack==POSITIVE_ACKNOWLEDGEMENT):
+                    read = file.read(1024)
+                
+                    if(read==b''):
+                        file.close()
+                        print("file sent")
+                        client_socket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),s_address)
+                        break
+                    else:
+                        client_socket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),s_address)
+                else:
+                    print("There was an error")        
+        except:
+            print("File not Found")
+        
     else:
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
         s_packet, s_address = client_socket.recvfrom(2048)

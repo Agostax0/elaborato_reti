@@ -83,7 +83,29 @@ while True:
                     serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
         except: #il server deve informare il client che non ha trovato il file
             serversocket.sendto(packet(c_packet.comand,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
-
+        
+    elif (c_packet.comand=="put" or c_packet.comand=="3"):
+        title = c_packet.subject
+        print("receiving"+" \"" + title + "\"")
+        s_packet = packet(c_packet.comand, c_packet.subject, START_TRANSMISSION_ACKNOWLEDGEMENT, EMPTY_DATA)
+        serversocket.sendto(s_packet.encode(),client_address)
+        file = open(path+title,'wb')
+        while True:
+            #print("while loop")
+            file_packet, s_address = serversocket.recvfrom(2048)
+            #print("check pacchetto read", check_packet(file_packet)==False)
+            if(check_packet(file_packet)==False):
+                print("There was an error, pacchetto read corrotto")
+                file.close()
+                break
+            else:
+                file_packet = decode_packet(file_packet)
+                #print(file_packet)
+                if(file_packet.ack == FINISHED_TRANSMISSION_ACKNOWLEDGEMENT):
+                    file.close()
+                    break
+                else:
+                    file.write(file_packet.data) 
     else:
         #print("unrecognised comand", c_packet)
         if(c_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):

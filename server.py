@@ -95,6 +95,7 @@ while True:
         serversocket.sendto(s_packet.encode(),client_address)
         
         file = open(path+title,'wb')
+        t0 = time.time()
         while True:
             #print("while loop")
             file_packet, s_address = serversocket.recvfrom(2048)
@@ -107,6 +108,8 @@ while True:
                 file_packet = decode_packet(file_packet)
                 #print(file_packet)
                 if(file_packet.ack == FINISHED_TRANSMISSION_ACKNOWLEDGEMENT):
+                    t1 = time.time() - t0
+                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+title),t1)).encode()).encode(),client_address)
                     file.close()
                     print("file received")
                     break

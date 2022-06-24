@@ -59,6 +59,7 @@ while True:
                                 print("There was an error, primo pacchetto corrotto")
                             else:
                                 s_packet = decode_packet(s_packet)
+                                print("Successfully received: ", title)
                                 print(s_packet.data.decode())
                             file.close()
                             break
@@ -81,6 +82,13 @@ while True:
                             file.close()
                             print("file sent")
                             client_socket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),s_address)
+                            s_packet, s_address = client_socket.recvfrom(2048) #ricezione statistiche
+                            if(check_packet(s_packet)==False):
+                                print("There was an error, primo pacchetto corrotto")
+                            else:
+                                s_packet = decode_packet(s_packet)
+                                print("Successfully sent: ", c_packet.subject)
+                                print(s_packet.data.decode())
                             break
                         else:
                             client_socket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),s_address)

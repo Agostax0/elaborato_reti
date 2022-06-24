@@ -3,6 +3,7 @@ from pickle import EMPTY_DICT
 
 FILE_NOT_FOUND_ACKNOWLEDGEMENT = 404
 FINISHED_TRANSMISSION_ACKNOWLEDGEMENT = 400
+START_TRANSMISSION_ACKNOWLEDGEMENT = 500
 AWAITING_RESPONCE_ACKNOWLEDGEMENT = 100
 POSITIVE_ACKNOWLEDGEMENT = 200
 NEGATIVE_ACKNOWLEDGEMENT = 300
@@ -50,9 +51,11 @@ def decode_packet(received_packet):
     data = data_part[data_part_start:]
     ret = packet(comand,subject,ack,data)
     return ret
-def packet_str(packet):
-    acknowledge_part = "ack: " + str(len(str(packet.ack))) +" "+ str(packet.ack) + " "
-    comand_part = "comand: " + str(len(packet.comand)) +" "+ packet.comand + " "
-    subject_part = "subject: " + str(len(packet.subject)) +" " + packet.subject + " "
-    data_part = "data: " + str(len(packet.data)) + " "
-    return acknowledge_part + comand_part + subject_part + data_part
+    #controllare che "data" possa contenere caratteri non interpretabili come stringhe
+    #controllare con un file exe binario
+def check_packet(packet):
+    try:
+        decode_packet(packet)
+        return True
+    except:
+        return False

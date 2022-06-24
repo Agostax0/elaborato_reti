@@ -44,7 +44,7 @@ while True:
 
     #print(c_packet)
     if(check_packet(c_packet) == False):
-        c_packet = packet("", "", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
+        c_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
     else:
         c_packet = decode_packet(c_packet)
     if(c_packet.comand=="list" or c_packet.comand=="1"):
@@ -53,7 +53,7 @@ while True:
             s_packet = packet(c_packet.comand, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
             #print(s_packet.data)
         except:
-            s_packet = packet("", "", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
+            s_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
         toSend = s_packet.encode()
         #print(toSend)
         serversocket.sendto(toSend,client_address)    
@@ -83,22 +83,12 @@ while True:
                     serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
         except: #il server deve informare il client che non ha trovato il file
             serversocket.sendto(packet(c_packet.comand,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
-        
-    elif (c_comand=="put" or c_comand=="3"):
-        title = c_subject
-        print("receiving"+" \"" + title + "\"")
-        file = open(path+title,'wb')
-        while True:
-            packet, client_address = serversocket.recvfrom(2048)
-            if(packet==b''):
-                file.close()
-                print("finished receiving ", title)
-                break
-            else:
-                file.write(packet)
+
     else:
+        #print("unrecognised comand", c_packet)
         if(c_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):
-            s_packet = packet("","",NEGATIVE_ACKNOWLEDGEMENT,"There was an error".encode()) 
+            
+            s_packet = packet("None","None",NEGATIVE_ACKNOWLEDGEMENT,"There was an error".encode()) 
         else:       
-            s_packet = packet("","",POSITIVE_ACKNOWLEDGEMENT,get_comands_description().encode())
+            s_packet = packet("None","None",POSITIVE_ACKNOWLEDGEMENT,get_comands_description().encode())
         serversocket.sendto(s_packet.encode(), client_address)

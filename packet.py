@@ -18,11 +18,14 @@ class packet:
     @classmethod
     def from_message(cls,message,ack,data):
         try:
+            if(len(message)==0):
+                raise Exception
             s_comand = message.split()[0]
             s_subject = message[len(s_comand) + 1:]
         except:
+            #print("message was faulty")
             s_comand = "None"
-            s_subject = ""
+            s_subject = "None"
         return cls(s_comand,s_subject,ack,data)
     
     def __str__(self):
@@ -40,8 +43,10 @@ def decode_packet(received_packet):
     #byte = received_packet.decode()   
     byte = received_packet
     splitted = byte.split()
+    #print(splitted)
     ack = splitted[2]
     comand = splitted[5]
+    #print(splitted[7])
     subject_part_len = int(splitted[7])
     acknowledge_part_len = len(splitted[0]) + 1 + len(splitted[1]) + 1 + int(splitted[1]) + 1
     comand_part_len = len(splitted[3]) + 1 + len(splitted[4]) + 1 + int(splitted[4]) + 1
@@ -56,7 +61,7 @@ def decode_packet(received_packet):
     #controllare che "data" possa contenere caratteri non interpretabili come stringhe
     #controllare con un file exe binario
 def check_packet(packet):
-    decode_packet(packet)
+    #decode_packet(packet)
     try:
         decode_packet(packet)
         return True

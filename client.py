@@ -62,40 +62,11 @@ while True:
                             file.write(file_packet.data)
             client_socket.close()
             break
-    elif(message.__contains__("put") or message.split()[0].__contains__("3")):#put comand
-        title = ""
-        message_split = message.split()
-        if(len(message_split[1:])>2): #put "test con gli spazi.txt" = ['put','test','con','gli','spazi.txt']
-            if(len(message_split[0])==1):
-                title = message[2:] #3 ["test con gli spazi.txt"]
-            else:
-                title = message[4:] #put ["test con gli spazi.txt"]
-        else:
-            title = message.split()[1] #put [spazi.txt]
-        print(title)
-        try:
-            file = open(path+title ,'rb')
-            client_socket.sendto(message.encode(),(server_name,server_port))
-            print("sending" + " \"" + title + "\"")
-            t0 = time.time()
-            while True:
-                packet = file.read(2048)
-                if(packet==b''):
-                    print(title, "has been sent")
-                    print("Elapsed time = ", time.time()-t0 , " seconds")
-                    client_socket.sendto(b'',(server_name,server_port))
-                    #client_socket.sendto("File Sent".encode,(server_name,server_port))
-                    file.close()
-                    break
-                else:
-                    client_socket.sendto(packet,(server_name,server_port))
-        except Exception:
-            print("File not found")
-        client_socket.close()
-        break
+    
     else:
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
         s_packet, s_address = client_socket.recvfrom(2048)
+        #print("client received", s_packet)
         if(check_packet(s_packet)):
             print(decode_packet(s_packet).data.decode())
         else:

@@ -28,7 +28,7 @@ def ls():
     string = ""
     file_id = 1
     for file in get_files():
-        string += "["+str(file_id)+"] "+file+"\n" 
+        string += "["+str(file_id)+"] "+file+ "\t"+ order(os.path.getsize(path+file)) + "\n" 
         file_id += 1
     return string    
     

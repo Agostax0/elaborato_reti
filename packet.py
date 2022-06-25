@@ -1,4 +1,3 @@
-
 import math
 FINISHED_TRANSMISSION_ACKNOWLEDGEMENT = 400
 AWAITING_RESPONCE_ACKNOWLEDGEMENT = 100
@@ -16,12 +15,11 @@ class packet:
     @classmethod
     def from_message(cls,message,ack,data):
         try:
-            if(len(message)==0):
+            if(len(message)==0):#se il messaggio è vuoto passa all'except
                 raise Exception
             s_comand = message.split()[0]
             s_subject = message[len(s_comand) + 1:]
         except:
-            #print("message was faulty")
             s_comand = "None"
             s_subject = "None"
         return cls(s_comand,s_subject,ack,data)
@@ -38,13 +36,10 @@ class packet:
         return temp.encode() + self.data
     
 def decode_packet(received_packet):
-    #byte = received_packet.decode()   
     byte = received_packet
     splitted = byte.split()
-    #print(splitted)
     ack = splitted[2]
     comand = splitted[5]
-    #print(splitted[7])
     subject_part_len = int(splitted[7])
     acknowledge_part_len = len(splitted[0]) + 1 + len(splitted[1]) + 1 + int(splitted[1]) + 1
     comand_part_len = len(splitted[3]) + 1 + len(splitted[4]) + 1 + int(splitted[4]) + 1
@@ -56,10 +51,7 @@ def decode_packet(received_packet):
     data = data_part[data_part_start:]
     ret = packet(comand.decode(),subject.decode(),int(ack),data)
     return ret
-    #controllare che "data" possa contenere caratteri non interpretabili come stringhe
-    #controllare con un file exe binario
 def check_packet(packet):
-    #decode_packet(packet)
     try:
         decode_packet(packet)
         return True

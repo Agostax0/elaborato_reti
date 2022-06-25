@@ -3,8 +3,8 @@ import os
 from packet import *
 import time
 path = os.path.dirname(__file__)+"\\library\\" #if the folder doesn't exist
-if(not os.path.exists(path)):
-    os.mkdir(path)
+if(not os.path.exists(path)): #teoricamente la cartella dovrebbe esistere sempre
+    os.mkdir(path)  #però non si sa mai, non impatta le performance
 
 comands = {}
 comands["list"] = "1 or list ... lists all avaible files"   
@@ -76,7 +76,9 @@ while True:
                 if(read==b''):
                     f_in.close()
                     print("file successfully sent")
-                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                    size = os.path.getsize(path+file_name)
+                    size = str(size).encode()
+                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),client_address)
                     t1 = time.time() - t0
                     serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)
                     break

@@ -23,12 +23,12 @@ while True:
             else:
                 print("Server has denied permission")
         except:
-            print("There was an error")
+            print("An error has occured, packet has been compromised")
     elif(c_packet.comand=="get" or c_packet.comand=="2"):#get comand
         client_socket.sendto(c_packet.encode(),(server_name,server_port))#il client invia il comando + soggetto
         s_packet, s_address = client_socket.recvfrom(2048)#il server invia che ha trovato + ricevuto la richiesta
         if(check_packet(s_packet)==False):
-            print("There was an error, primo pacchetto corrotto")
+            print("An error has occured, packet has been compromised")
         else:
             s_packet = decode_packet(s_packet)
             title = s_packet.subject
@@ -39,18 +39,17 @@ while True:
                 while True:
                     file_packet, s_address = client_socket.recvfrom(2048)
                     if(check_packet(file_packet)==False):
-                        print("There was an error, pacchetto read corrotto")
+                        print("An error has occured, data-packet has been compromised")
                         file.close()
                         break
                     else:
                         file_packet = decode_packet(file_packet)
-                        #print(file_packet)
                         if(file_packet.ack == FINISHED_TRANSMISSION_ACKNOWLEDGEMENT):
                             file.close()
                             if(int(file_packet.data.decode())==os.path.getsize(path+title)):
                                 s_packet, s_address = client_socket.recvfrom(2048) #ricezione statistiche
                                 if(check_packet(s_packet)==False):
-                                    print("There was an error, primo pacchetto corrotto")
+                                    print("An error has occured, server-packet has been compromised")
                                 else:
                                     s_packet = decode_packet(s_packet)
                                     print("Successfully received: ", title)
@@ -74,14 +73,14 @@ while True:
                         read = file.read(1024)
                         if(read==b''):
                             file.close()
-                            print("file sent")
+                            print("file successfully sent")
                             size = os.path.getsize(path+c_packet.subject)
                             size = str(size).encode()
                             client_socket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),s_address)
                             s_packet, s_address = client_socket.recvfrom(2048) #ricezione statistiche o messaggio file non completo
                             
                             if(check_packet(s_packet)==False):
-                                print("An error has occurred, server packet has been compromised")
+                                print("An error has occurred, server-packet has been compromised")
                             else:
                                 s_packet = decode_packet(s_packet)
                                 if(s_packet.ack==POSITIVE_ACKNOWLEDGEMENT):
@@ -95,7 +94,7 @@ while True:
                     client_socket.close()
                     break
             else:
-                print("There was an error, server has denied permission")        
+                print("An error has occured, server has denied permission")        
         except:
             print("File not found")
     else:
@@ -104,4 +103,4 @@ while True:
         if(check_packet(s_packet)):
             print(decode_packet(s_packet).data.decode())
         else:
-            print("An error has occurred, packet could be compromised")
+            print("An error has occurred, packet has been compromised")

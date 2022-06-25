@@ -43,21 +43,18 @@ serversocket.bind(server_address)
 print('server open on ', server_address)
 while True:
     c_packet, client_address = serversocket.recvfrom(2048)
-    print(c_packet)
-    #print(c_packet)
     if(check_packet(c_packet) == False):
         c_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
+        print("client: ", client_address, " sent a corrupted packet")
     else:
         c_packet = decode_packet(c_packet)
+        print("client: ", client_address, " sent: ", c_packet)
     if(c_packet.comand=="list" or c_packet.comand=="1"):
         try:
-            #print(ls().encode())
             s_packet = packet(c_packet.comand, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
-            #print(s_packet.data)
         except:
             s_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
         toSend = s_packet.encode()
-        #print(toSend)
         serversocket.sendto(toSend,client_address)    
     elif(c_packet.comand=="get" or c_packet.comand=="2"):
         try:
@@ -78,7 +75,7 @@ while True:
                 read = f_in.read(1024)
                 if(read==b''):
                     f_in.close()
-                    print("file sent")
+                    print("file successfully sent")
                     serversocket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
                     t1 = time.time() - t0
                     serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)
@@ -97,28 +94,29 @@ while True:
         file = open(path+title,'wb')
         t0 = time.time()
         while True:
-            #print("while loop")
             file_packet, s_address = serversocket.recvfrom(2048)
-            #print("check pacchetto read", check_packet(file_packet)==False)
             if(check_packet(file_packet)==False):
-                print("There was an error, pacchetto read corrotto")
+                print("An error has occured while writing")
                 file.close()
                 break
             else:
                 file_packet = decode_packet(file_packet)
-                #print(file_packet)
                 if(file_packet.ack == FINISHED_TRANSMISSION_ACKNOWLEDGEMENT):
                     t1 = time.time() - t0
-                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+title),t1)).encode()).encode(),client_address)
                     file.close()
-                    print("file received")
+                    if(int(file_packet.data.decode())==os.path.getsize(path+title)):
+                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+title),t1)).encode()).encode(),client_address)
+                        print("file successfully received")
+                    else:
+                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,NEGATIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                        print("File size mismatch")
                     break
                 else:
                     file.write(file_packet.data) 
     else:
         #print("unrecognised comand", c_packet)
         if(c_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):
-            s_packet = packet("None","None",NEGATIVE_ACKNOWLEDGEMENT,"There was an error".encode()) 
+            s_packet = packet("None","None",NEGATIVE_ACKNOWLEDGEMENT,"An error has occoured while receiving".encode()) 
         else:       
             s_packet = packet("None","None",POSITIVE_ACKNOWLEDGEMENT,get_comands_description().encode())
         serversocket.sendto(s_packet.encode(), client_address)

@@ -52,11 +52,9 @@ while True:
     c_packet, client_address = serversocket.recvfrom(2048)
     if(check_packet(c_packet) == False):
         c_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
-        #print("client: ", client_address, " sent a corrupted packet")
     else:
         c_packet = decode_packet(c_packet)
         log(client_address, c_packet)
-        #print("client: ", client_address, " sent: ", c_packet)
     if(c_packet.command=="list" or c_packet.command=="1"):
         try:
             s_packet = packet(c_packet.command, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
@@ -68,12 +66,10 @@ while True:
         try:
             try:
                 file_id = int(c_packet.subject)
-                #print("client referred to the file using its id")
                 files = get_files()
                 file_name = files[file_id-1]
             except:
                 if(c_packet.subject):
-                    #print("client referred to the file using its name")
                     file_name = c_packet.subject
             print("client ", client_address," requested ", file_name)
             if(not os.path.exists(path + file_name)): #il server deve informare il client che non ha trovato il file
@@ -97,7 +93,9 @@ while True:
                     else:
                         serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
         except: 
-            print("An error has occured")
+            if(len(c_packet.subject)==0):
+                serversocket.sendto(packet(c_packet.command,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                print("An error has occured, file name was invalid")
         
     elif (c_packet.command=="put" or c_packet.command=="3"):
         title = c_packet.subject
@@ -128,7 +126,6 @@ while True:
                 else:
                     file.write(file_packet.data) 
     else:
-        #print("unrecognised command", c_packet)
         if(c_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):
             s_packet = packet("None","None",NEGATIVE_ACKNOWLEDGEMENT,"An error has occoured while receiving".encode()) 
         else:       

@@ -13,7 +13,7 @@ client_socket = socket(AF_INET, SOCK_DGRAM)
 while True:
     message = input('input the command: ')
     c_packet = packet.from_message(message,AWAITING_RESPONCE_ACKNOWLEDGEMENT,EMPTY_DATA)
-    if(c_packet.command == "list" or c_packet.command == "1"): #list command
+    if(c_packet.command == "list" or c_packet.command == "1"):
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
         s_packet, s_address = client_socket.recvfrom(2048)
         try:
@@ -24,7 +24,7 @@ while True:
                 print("Server has denied permission")
         except:
             print("An error has occured, packet has been compromised")
-    elif(c_packet.command=="get" or c_packet.command=="2"):#get command
+    elif(c_packet.command=="get" or c_packet.command=="2"):
         client_socket.sendto(c_packet.encode(),(server_name,server_port))#il client invia il commando + soggetto
         s_packet, s_address = client_socket.recvfrom(2048)#il server invia che ha trovato + ricevuto la richiesta
         if(check_packet(s_packet)==False):
@@ -100,7 +100,7 @@ while True:
                 else:
                     print("An error has occured, packet has been corrupted")       
         except:
-            print("An error has occured")
+            print("An error has occured, file coudln't be accessed")
     else:
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
         s_packet, s_address = client_socket.recvfrom(2048)

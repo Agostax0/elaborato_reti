@@ -68,24 +68,28 @@ while True:
                     print("client referred to the file using its name")
                     file_name = c_packet.subject
             print("client ", client_address," requested ", file_name)
-            f_in = open(path+file_name,'rb')
-            serversocket.sendto(packet(c_packet.comand,file_name,START_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
-            t0 = time.time()
-            while True:
-                read = f_in.read(1024)
-                if(read==b''):
-                    f_in.close()
-                    print("file successfully sent")
-                    size = os.path.getsize(path+file_name)
-                    size = str(size).encode()
-                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),client_address)
-                    t1 = time.time() - t0
-                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)
-                    break
-                else:
-                    serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
-        except: #il server deve informare il client che non ha trovato il file
-            serversocket.sendto(packet(c_packet.comand,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+            if(not os.path.exists(path+"c_file")): #il server deve informare il client che non ha trovato il file
+                print("File not found")
+                serversocket.sendto(packet(c_packet.comand,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+            else: 
+                f_in = open(path+file_name,'rb')
+                serversocket.sendto(packet(c_packet.comand,file_name,START_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                t0 = time.time()
+                while True:
+                    read = f_in.read(1024)
+                    if(read==b''):
+                        f_in.close()
+                        print("file successfully sent")
+                        size = os.path.getsize(path+file_name)
+                        size = str(size).encode()
+                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),client_address)
+                        t1 = time.time() - t0
+                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)
+                        break
+                    else:
+                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
+        except: 
+            print("An error has occured")
         
     elif (c_packet.comand=="put" or c_packet.comand=="3"):
         title = c_packet.subject

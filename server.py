@@ -2,6 +2,7 @@ from socket import *
 import os
 from packet import *
 import time
+from datetime import datetime
 path = os.path.dirname(__file__)+"\\library\\" #if the folder doesn't exist
 if(not os.path.exists(path)): #teoricamente la cartella dovrebbe esistere sempre
     os.mkdir(path)  #però non si sa mai, non impatta le performance
@@ -31,7 +32,13 @@ def ls():
         string += "["+str(file_id)+"] "+file+ "\t"+ order(os.path.getsize(path+file)) + "\n" 
         file_id += 1
     return string    
-    
+def log(client_address,client_packet):
+    path = os.path.dirname(__file__)+ "\\"
+    log_file = open(path+"log.txt",'a')
+    today = "[" + str(datetime.now()) + "] " + str(client_address)+ " " + str(client_packet) + "\n"
+    log_file.write(today)
+    log_file.close()
+
 server_port = 1200
 
 serversocket = socket(AF_INET, SOCK_DGRAM)
@@ -48,6 +55,7 @@ while True:
         print("client: ", client_address, " sent a corrupted packet")
     else:
         c_packet = decode_packet(c_packet)
+        log(client_address, c_packet)
         print("client: ", client_address, " sent: ", c_packet)
     if(c_packet.comand=="list" or c_packet.comand=="1"):
         try:

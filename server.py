@@ -7,18 +7,18 @@ path = os.path.dirname(__file__)+"\\library\\" #if the folder doesn't exist
 if(not os.path.exists(path)): #teoricamente la cartella dovrebbe esistere sempre
     os.mkdir(path)  #però non si sa mai, non impatta le performance
 
-comands = {}
-comands["list"] = "1 or list ... lists all avaible files"   
-comands["get"] = "2 or get [\"name\"] ... downloads the selected file if it exists"
-comands["put"] = "3 or put [\"name\"] ... uploads the selected file if it exists"
-comand_list = []
-for comand in comands:
-    comand_list.append(comand)
-def get_comands_description():
-    comands_description = ""
-    for tooltip in comands:
-        comands_description+=(comands[tooltip]+"\n")
-    return comands_description
+commands = {}
+commands["list"] = "1 or list ... lists all avaible files"   
+commands["get"] = "2 or get [\"name\"] ... downloads the selected file if it exists"
+commands["put"] = "3 or put [\"name\"] ... uploads the selected file if it exists"
+command_list = []
+for command in commands:
+    command_list.append(command)
+def get_commands_description():
+    commands_description = ""
+    for tooltip in commands:
+        commands_description+=(commands[tooltip]+"\n")
+    return commands_description
 def get_files():
     files = []
     for file in os.scandir(path=path):
@@ -57,14 +57,14 @@ while True:
         c_packet = decode_packet(c_packet)
         log(client_address, c_packet)
         #print("client: ", client_address, " sent: ", c_packet)
-    if(c_packet.comand=="list" or c_packet.comand=="1"):
+    if(c_packet.command=="list" or c_packet.command=="1"):
         try:
-            s_packet = packet(c_packet.comand, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
+            s_packet = packet(c_packet.command, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
         except:
             s_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
         toSend = s_packet.encode()
         serversocket.sendto(toSend,client_address)    
-    elif(c_packet.comand=="get" or c_packet.comand=="2"):
+    elif(c_packet.command=="get" or c_packet.command=="2"):
         try:
             try:
                 file_id = int(c_packet.subject)
@@ -78,10 +78,10 @@ while True:
             print("client ", client_address," requested ", file_name)
             if(not os.path.exists(path + file_name)): #il server deve informare il client che non ha trovato il file
                 print("File not found")
-                serversocket.sendto(packet(c_packet.comand,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                serversocket.sendto(packet(c_packet.command,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
             else: 
                 f_in = open(path+file_name,'rb')
-                serversocket.sendto(packet(c_packet.comand,file_name,START_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                serversocket.sendto(packet(c_packet.command,file_name,START_TRANSMISSION_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
                 t0 = time.time()
                 while True:
                     read = f_in.read(1024)
@@ -90,19 +90,19 @@ while True:
                         print("file successfully sent")
                         size = os.path.getsize(path+file_name)
                         size = str(size).encode()
-                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),client_address)
+                        serversocket.sendto(packet(c_packet.command,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),client_address)
                         t1 = time.time() - t0
-                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)
+                        serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)
                         break
                     else:
-                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
+                        serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
         except: 
             print("An error has occured")
         
-    elif (c_packet.comand=="put" or c_packet.comand=="3"):
+    elif (c_packet.command=="put" or c_packet.command=="3"):
         title = c_packet.subject
         print("receiving"+" \"" + title + "\"")
-        s_packet = packet(c_packet.comand, c_packet.subject, START_TRANSMISSION_ACKNOWLEDGEMENT, EMPTY_DATA)
+        s_packet = packet(c_packet.command, c_packet.subject, START_TRANSMISSION_ACKNOWLEDGEMENT, EMPTY_DATA)
         serversocket.sendto(s_packet.encode(),client_address)
         
         file = open(path+title,'wb')
@@ -119,18 +119,18 @@ while True:
                     t1 = time.time() - t0
                     file.close()
                     if(int(file_packet.data.decode())==os.path.getsize(path+title)):
-                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+title),t1)).encode()).encode(),client_address)
+                        serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+title),t1)).encode()).encode(),client_address)
                         print("file successfully received")
                     else:
-                        serversocket.sendto(packet(c_packet.comand,c_packet.subject,NEGATIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                        serversocket.sendto(packet(c_packet.command,c_packet.subject,NEGATIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
                         print("File size mismatch")
                     break
                 else:
                     file.write(file_packet.data) 
     else:
-        #print("unrecognised comand", c_packet)
+        #print("unrecognised command", c_packet)
         if(c_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):
             s_packet = packet("None","None",NEGATIVE_ACKNOWLEDGEMENT,"An error has occoured while receiving".encode()) 
         else:       
-            s_packet = packet("None","None",POSITIVE_ACKNOWLEDGEMENT,get_comands_description().encode())
+            s_packet = packet("None","None",POSITIVE_ACKNOWLEDGEMENT,get_commands_description().encode())
         serversocket.sendto(s_packet.encode(), client_address)

@@ -2,7 +2,7 @@ from socket import *
 import os
 from packet import *
 
-comands = ["list","get","put"]
+commands = ["list","get","put"]
 path = os.path.dirname(__file__)+"\\download\\" #if the folder doesn't exist
 if(not os.path.exists(path)):
     os.mkdir(path)
@@ -11,9 +11,9 @@ server_name = 'localhost'
 server_port = 1200
 client_socket = socket(AF_INET, SOCK_DGRAM)
 while True:
-    message = input('input the comand: ')
+    message = input('input the command: ')
     c_packet = packet.from_message(message,AWAITING_RESPONCE_ACKNOWLEDGEMENT,EMPTY_DATA)
-    if(c_packet.comand == "list" or c_packet.comand == "1"): #list comand
+    if(c_packet.command == "list" or c_packet.command == "1"): #list command
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
         s_packet, s_address = client_socket.recvfrom(2048)
         try:
@@ -24,8 +24,8 @@ while True:
                 print("Server has denied permission")
         except:
             print("An error has occured, packet has been compromised")
-    elif(c_packet.comand=="get" or c_packet.comand=="2"):#get comand
-        client_socket.sendto(c_packet.encode(),(server_name,server_port))#il client invia il comando + soggetto
+    elif(c_packet.command=="get" or c_packet.command=="2"):#get command
+        client_socket.sendto(c_packet.encode(),(server_name,server_port))#il client invia il commando + soggetto
         s_packet, s_address = client_socket.recvfrom(2048)#il server invia che ha trovato + ricevuto la richiesta
         if(check_packet(s_packet)==False):
             print("An error has occured, packet has been compromised")
@@ -61,7 +61,7 @@ while True:
                             file.write(file_packet.data)
             client_socket.close()
             break
-    elif(c_packet.comand=="put" or c_packet.comand=="3"):
+    elif(c_packet.command=="put" or c_packet.command=="3"):
         try:
             if(not os.path.exists(path + c_packet.subject)):
                 print("File not found") #Avvisa il client che il file non esiste
@@ -78,7 +78,7 @@ while True:
                                 print("file successfully sent")
                                 size = os.path.getsize(path+c_packet.subject)
                                 size = str(size).encode()
-                                client_socket.sendto(packet(c_packet.comand,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),s_address)
+                                client_socket.sendto(packet(c_packet.command,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),s_address)
                                 s_packet, s_address = client_socket.recvfrom(2048) #ricezione statistiche o messaggio file non completo
                                 
                                 if(check_packet(s_packet)==False):
@@ -92,7 +92,7 @@ while True:
                                         print("File was not received correctly")
                                 break
                             else:
-                                client_socket.sendto(packet(c_packet.comand,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),s_address)
+                                client_socket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),s_address)
                         client_socket.close()
                         break
                     else:

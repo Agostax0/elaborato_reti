@@ -21,7 +21,7 @@ def get_commands_description():
     return commands_description
 def get_files():
     files = []
-    for file in os.scandir(path=path):
+    for file in os.scandir(path):
         files.append(file.name)
     return files
 

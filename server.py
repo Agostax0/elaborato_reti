@@ -54,7 +54,10 @@ while True:
         c_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
     else:
         c_packet = decode_packet(c_packet)
-        log(client_address, c_packet)
+        if(c_packet.ack == POSITIVE_ACKNOWLEDGEMENT):
+            log(client_address, c_packet)
+        else:#pacchetto corrotto
+            c_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
     if(c_packet.command=="list" or c_packet.command=="1"):
         try:
             s_packet = packet(c_packet.command, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, ls().encode())
@@ -74,7 +77,7 @@ while True:
             print("client ", client_address," requested ", file_name)
             if(not os.path.exists(path + file_name)): #il server deve informare il client che non ha trovato il file
                 print("File not found")
-                serversocket.sendto(packet(c_packet.command,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+                serversocket.sendto(packet(c_packet.command,c_packet.subject,NEGATIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
             else: 
                 f_in = open(path+file_name,'rb')
                 serversocket.sendto(packet(c_packet.command,file_name,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
@@ -93,8 +96,8 @@ while True:
                     else:
                         serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
         except: 
-            if(len(c_packet.subject)==0):
-                serversocket.sendto(packet(c_packet.command,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
+            if(len(c_packet.subject)==0):#soggetto del comando non specificato -> file non esistente
+                serversocket.sendto(packet(c_packet.command,c_packet.subject,NEGATIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
                 print("An error has occured, file name was invalid")
         
     elif (c_packet.command=="put" or c_packet.command=="3"):

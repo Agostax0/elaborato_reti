@@ -12,7 +12,7 @@ server_port = 1200
 client_socket = socket(AF_INET, SOCK_DGRAM)
 while True:
     message = input('input the command: ')
-    c_packet = packet.from_message(message,AWAITING_RESPONCE_ACKNOWLEDGEMENT,EMPTY_DATA)
+    c_packet = packet.from_message(message,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA)
     if(c_packet.command == "list" or c_packet.command == "1"):
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
         s_packet, s_address = client_socket.recvfrom(2048)
@@ -32,7 +32,7 @@ while True:
         else:
             s_packet = decode_packet(s_packet)
             title = s_packet.subject
-            if(s_packet.ack==FILE_NOT_FOUND_ACKNOWLEDGEMENT):
+            if(s_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):#server non ha trovato il file
                 print("File not found")
             else:
                 file = open(path+title,'wb')#la creazione file non crea eccezioni

@@ -2,7 +2,7 @@ from socket import *
 import os
 from packet import *
 import time
-from datetime import datetime
+import datetime
 path = os.path.dirname(__file__)+"\\library\\" #if the folder doesn't exist
 if(not os.path.exists(path)): #teoricamente la cartella dovrebbe esistere sempre
     os.mkdir(path)  #però non si sa mai, non impatta le performance
@@ -35,7 +35,7 @@ def ls():
 def log(client_address,client_packet):
     path = os.path.dirname(__file__)+ "\\"
     log_file = open(path+"log.txt",'a')
-    today = "[" + str(datetime.now()) + "] " + str(client_address)+ " " + str(client_packet) + "\n"
+    today = "[" + str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + "] " + str(client_address)+ " " + str(client_packet) + "\n"
     log_file.write(today)
     log_file.close()
 
@@ -86,9 +86,10 @@ while True:
                     read = f_in.read(1024)
                     if(read==b''):
                         f_in.close()
-                        print("file successfully sent")
+                        print("file was sent")
                         size = os.path.getsize(path+file_name)
                         size = str(size).encode()
+                        print("file size is:",size.decode())
                         serversocket.sendto(packet(c_packet.command,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),client_address)
                         t1 = time.time() - t0
                         serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)

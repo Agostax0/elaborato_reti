@@ -1,7 +1,7 @@
 from socket import *
 import os
 from packet import *
-
+import datetime
 commands = ["list","get","put"]
 path = os.path.dirname(__file__)+"\\download\\" #if the folder doesn't exist
 if(not os.path.exists(path)):
@@ -11,7 +11,8 @@ server_name = 'localhost'
 server_port = 1200
 client_socket = socket(AF_INET, SOCK_DGRAM)
 while True:
-    message = input('input the command: ')
+    output = "["+ str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + "] "+ "\ninput the command: "
+    message = input(output)
     c_packet = packet.from_message(message,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA)
     if(c_packet.command == "list" or c_packet.command == "1"):
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
@@ -46,6 +47,7 @@ while True:
                         file_packet = decode_packet(file_packet)
                         if(file_packet.ack == FINISHED_TRANSMISSION_ACKNOWLEDGEMENT):
                             file.close()
+                            
                             if(int(file_packet.data.decode())==os.path.getsize(path+title)):
                                 s_packet, s_address = client_socket.recvfrom(2048) #ricezione statistiche
                                 if(check_packet(s_packet)==False):
@@ -55,7 +57,9 @@ while True:
                                     print("Successfully received: ", title)
                                     print(s_packet.data.decode())
                             else:
-                                print("File was not received correctly")
+                                print("expected file size: ",file_packet.data.decode())
+                                print("current file size: ", os.path.getsize(path+title))
+                                print("File was not received correctly, file size mismatch")
                             break
                         else:
                             file.write(file_packet.data)
@@ -89,7 +93,7 @@ while True:
                                         print("Successfully sent: ", c_packet.subject)
                                         print(s_packet.data.decode())
                                     else:
-                                        print("File was not received correctly")
+                                        print("File was not received correctly, file size mismatch")
                                 break
                             else:
                                 client_socket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),s_address)

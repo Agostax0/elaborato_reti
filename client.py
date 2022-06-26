@@ -97,6 +97,7 @@ while True:
                                 break
                             else:
                                 client_socket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),s_address)
+                                delay()
                         client_socket.close()
                         break
                     else:

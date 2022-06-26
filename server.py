@@ -48,10 +48,6 @@ server_address = ('localhost',server_port)
 serversocket.bind(server_address)
 
 print('server open on ', server_address)
-print(str(datetime.datetime.now()))
-
-print(str(datetime.datetime.now()))
-
 while True:
     c_packet, client_address = serversocket.recvfrom(BUFFER)
     if(check_packet(c_packet) == False):

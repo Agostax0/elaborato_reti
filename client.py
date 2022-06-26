@@ -27,7 +27,7 @@ while True:
             print("An error has occured, packet has been compromised")
     elif(c_packet.command=="get" or c_packet.command=="2"):
         client_socket.sendto(c_packet.encode(),(server_name,server_port))#il client invia il commando + soggetto
-        s_packet, s_address = client_socket.recvfrom(2048)#il server invia che ha trovato + ricevuto la richiesta
+        s_packet, s_address = client_socket.recvfrom(BUFFER)#il server invia che ha trovato + ricevuto la richiesta
         if(check_packet(s_packet)==False):
             print("An error has occured, packet has been compromised")
         else:
@@ -38,7 +38,7 @@ while True:
             else:
                 file = open(path+title,'wb')#la creazione file non crea eccezioni
                 while True:
-                    file_packet, s_address = client_socket.recvfrom(2048)
+                    file_packet, s_address = client_socket.recvfrom(BUFFER)
                     if(check_packet(file_packet)==False):
                         print("An error has occured, data-packet has been compromised")
                         file.close()
@@ -49,7 +49,7 @@ while True:
                             file.close()
                             
                             if(int(file_packet.data.decode())==os.path.getsize(path+title)):
-                                s_packet, s_address = client_socket.recvfrom(2048) #ricezione statistiche
+                                s_packet, s_address = client_socket.recvfrom(BUFFER) #ricezione statistiche
                                 if(check_packet(s_packet)==False):
                                     print("An error has occured, server-packet has been compromised")
                                 else:
@@ -72,18 +72,18 @@ while True:
             else:
                 file = open(path+c_packet.subject ,'rb')
                 client_socket.sendto(c_packet.encode(),(server_name,server_port))
-                s_packet, s_address = client_socket.recvfrom(2048)
+                s_packet, s_address = client_socket.recvfrom(BUFFER)
                 if(check_packet(s_packet)):
                     if(decode_packet(s_packet).ack==POSITIVE_ACKNOWLEDGEMENT):
                         while True:
-                            read = file.read(1024)
+                            read = file.read(READ)
                             if(read==b''):
                                 file.close()
                                 print("file successfully sent")
                                 size = os.path.getsize(path+c_packet.subject)
                                 size = str(size).encode()
                                 client_socket.sendto(packet(c_packet.command,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),s_address)
-                                s_packet, s_address = client_socket.recvfrom(2048) #ricezione statistiche o messaggio file non completo
+                                s_packet, s_address = client_socket.recvfrom(BUFFER) #ricezione statistiche o messaggio file non completo
                                 
                                 if(check_packet(s_packet)==False):
                                     print("An error has occurred, server-packet has been compromised")
@@ -107,7 +107,7 @@ while True:
             print("An error has occured, file coudln't be accessed")
     else:
         client_socket.sendto(c_packet.encode(),(server_name,server_port))
-        s_packet, s_address = client_socket.recvfrom(2048)
+        s_packet, s_address = client_socket.recvfrom(BUFFER)
         if(check_packet(s_packet)):
             print(decode_packet(s_packet).data.decode())
         else:

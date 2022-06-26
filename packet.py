@@ -3,6 +3,8 @@ FINISHED_TRANSMISSION_ACKNOWLEDGEMENT = 400
 NEGATIVE_ACKNOWLEDGEMENT = 300
 POSITIVE_ACKNOWLEDGEMENT = 200
 EMPTY_DATA = b''
+BUFFER = 4096
+READ = 2048
 class packet:
     def __init__(self,command,subject,ack,data):
         self.command = command
@@ -64,4 +66,7 @@ def order(measure):
         val = val / 1024
         order +=1
     return str(math.floor(val)) + orders[order]        
-    
+def delay():
+    x = 0
+    for i in range(1000):
+        x+=i

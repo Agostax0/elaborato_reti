@@ -48,8 +48,12 @@ server_address = ('localhost',server_port)
 serversocket.bind(server_address)
 
 print('server open on ', server_address)
+print(str(datetime.datetime.now()))
+
+print(str(datetime.datetime.now()))
+
 while True:
-    c_packet, client_address = serversocket.recvfrom(2048)
+    c_packet, client_address = serversocket.recvfrom(BUFFER)
     if(check_packet(c_packet) == False):
         c_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
     else:
@@ -64,7 +68,7 @@ while True:
         except:
             s_packet = packet("None", "None", NEGATIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
         toSend = s_packet.encode()
-        serversocket.sendto(toSend,client_address)    
+        serversocket.sendto(toSend,client_address)
     elif(c_packet.command=="get" or c_packet.command=="2"):
         try:
             try:
@@ -83,7 +87,7 @@ while True:
                 serversocket.sendto(packet(c_packet.command,file_name,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
                 t0 = time.time()
                 while True:
-                    read = f_in.read(1024)
+                    read = f_in.read(READ)
                     if(read==b''):
                         f_in.close()
                         print("file was sent")
@@ -96,6 +100,7 @@ while True:
                         break
                     else:
                         serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
+                        delay()
         except: 
             if(len(c_packet.subject)==0):#soggetto del comando non specificato -> file non esistente
                 serversocket.sendto(packet(c_packet.command,c_packet.subject,NEGATIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
@@ -110,7 +115,7 @@ while True:
         file = open(path+title,'wb')
         t0 = time.time()
         while True:
-            file_packet, s_address = serversocket.recvfrom(2048)
+            file_packet, s_address = serversocket.recvfrom(BUFFER)
             if(check_packet(file_packet)==False):
                 print("An error has occured while writing")
                 file.close()

@@ -68,7 +68,7 @@ while True:
                     print("client referred to the file using its name")
                     file_name = c_packet.subject
             print("client ", client_address," requested ", file_name)
-            if(not os.path.exists(path+"c_file")): #il server deve informare il client che non ha trovato il file
+            if(not os.path.exists(path + file_name)): #il server deve informare il client che non ha trovato il file
                 print("File not found")
                 serversocket.sendto(packet(c_packet.comand,c_packet.subject,FILE_NOT_FOUND_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
             else: 

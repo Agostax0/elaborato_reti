@@ -11,7 +11,7 @@ server_name = 'localhost'
 server_port = 1200
 client_socket = socket(AF_INET, SOCK_DGRAM)
 while True:
-    output = "["+ str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + "] "+ "\ninput the command: "
+    output = "["+ str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + "] "+ "\n[please input a command] "
     message = input(output)
     c_packet = packet.from_message(message,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA)
     if(c_packet.command == "list" or c_packet.command == "1"):

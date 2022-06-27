@@ -110,7 +110,9 @@ while True:
         print("receiving"+" \"" + title + "\"")
         s_packet = packet(c_packet.command, c_packet.subject, POSITIVE_ACKNOWLEDGEMENT, EMPTY_DATA)
         serversocket.sendto(s_packet.encode(),client_address)
-        
+        if(os.path.exists(path+title)):
+            print("file already exists, substituting with current")
+            os.remove(path+title)
         file = open(path+title,'wb')
         t0 = time.time()
         while True:

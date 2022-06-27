@@ -36,6 +36,9 @@ while True:
             if(s_packet.ack==NEGATIVE_ACKNOWLEDGEMENT):#server non ha trovato il file
                 print("File not found")
             else:
+                if(os.path.exists(path+title)):
+                    print("file already exists, substituting with current")
+                    os.remove(path+title)
                 file = open(path+title,'wb')#la creazione file non crea eccezioni
                 while True:
                     file_packet, s_address = client_socket.recvfrom(BUFFER)
@@ -63,8 +66,8 @@ while True:
                             break
                         else:
                             file.write(file_packet.data)
-            client_socket.close()
-            break
+                client_socket.close()
+                break
     elif(c_packet.command=="put" or c_packet.command=="3"):
         try:
             if(not os.path.exists(path + c_packet.subject)):
@@ -97,7 +100,7 @@ while True:
                                 break
                             else:
                                 client_socket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),s_address)
-                                delay()
+                                delay(1000)
                         client_socket.close()
                         break
                     else:

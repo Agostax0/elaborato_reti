@@ -82,6 +82,7 @@ while True:
                 f_in = open(path+file_name,'rb')
                 serversocket.sendto(packet(c_packet.command,file_name,POSITIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)
                 t0 = time.time()
+                total_delayed = 0
                 while True:
                     read = f_in.read(READ)
                     if(read==b''):
@@ -91,12 +92,12 @@ while True:
                         size = str(size).encode()
                         print("file size is:",size.decode())
                         serversocket.sendto(packet(c_packet.command,c_packet.subject,FINISHED_TRANSMISSION_ACKNOWLEDGEMENT,size).encode(),client_address)
-                        t1 = time.time() - t0
+                        t1 = time.time() - t0 #- total_delayed
                         serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,(statistics(os.path.getsize(path+file_name),t1)).encode()).encode(),client_address)
                         break
                     else:
                         serversocket.sendto(packet(c_packet.command,c_packet.subject,POSITIVE_ACKNOWLEDGEMENT,read).encode(),client_address)
-                        delay()
+                        total_delayed += delay(1000)
         except: 
             if(len(c_packet.subject)==0):#soggetto del comando non specificato -> file non esistente
                 serversocket.sendto(packet(c_packet.command,c_packet.subject,NEGATIVE_ACKNOWLEDGEMENT,EMPTY_DATA).encode(),client_address)

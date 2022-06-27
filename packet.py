@@ -1,4 +1,5 @@
 import math
+import time
 FINISHED_TRANSMISSION_ACKNOWLEDGEMENT = 400
 NEGATIVE_ACKNOWLEDGEMENT = 300
 POSITIVE_ACKNOWLEDGEMENT = 200
@@ -57,7 +58,7 @@ def check_packet(packet):
     except:
         return False
 def statistics(size,time):
-    return "Size: " + order(size) + " Time elapsed: " + str(math.floor(time)) + "s Rate: " + order(size/time) + "/s"
+    return "Size: " + order(size) + " Time elapsed: " + str(round(time,2)) + "s Rate: " + order(size/time) + "/s"
 def order(measure):
     orders = ["B","KB","MB","GB"]
     order = 0
@@ -65,8 +66,10 @@ def order(measure):
     while val > 1024:
         val = val / 1024
         order +=1
-    return str(math.floor(val)) + orders[order]        
-def delay():
+    return str(round(val,2)) + orders[order]        
+def delay(n_range):
+    t0 = time.time()
     x = 0
-    for i in range(1000):
+    for i in range(n_range):
         x+=i
+    return time.time() - t0

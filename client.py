@@ -60,8 +60,8 @@ while True:
                                     print("Successfully received: ", title)
                                     print(s_packet.data.decode())
                             else:
-                                print("expected file size: ",file_packet.data.decode())
-                                print("current file size: ", os.path.getsize(path+title))
+                                print("expected file size: ", order(int(file_packet.data.decode())))
+                                print("current file size: ", order(os.path.getsize(path+title)))
                                 print("File was not received correctly, file size mismatch")
                             break
                         else:
